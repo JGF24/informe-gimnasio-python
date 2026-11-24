@@ -149,6 +149,19 @@ def escribir_tabla(ws, fila_inicio: int, cabecera: list, filas: list, anchos: li
         ws.auto_filter.ref = f"A{fila_inicio}:{ultima}"
 
 
+def solo_etiqueta(valor: bool = False, porcentaje: bool = False) -> DataLabelList:
+    """Etiquetas de gráfico que muestran solo el valor o el porcentaje.
+    Hay que desactivar el resto a mano: si no, Excel añade serie y categoría."""
+    etiquetas = DataLabelList()
+    etiquetas.showVal = valor
+    etiquetas.showPercent = porcentaje
+    etiquetas.showSerName = False
+    etiquetas.showCatName = False
+    etiquetas.showLegendKey = False
+    etiquetas.showLeaderLines = False
+    return etiquetas
+
+
 def hoja_resumen(wb: Workbook, r: dict, nombre_mes: str):
     ws = wb.active
     ws.title = "Resumen"
@@ -199,8 +212,9 @@ def hoja_resumen(wb: Workbook, r: dict, nombre_mes: str):
     barras.legend = None
     barras.height, barras.width = 7.5, 13
     barras.series[0].graphicalProperties.solidFill = COLOR_PRINCIPAL
-    barras.dataLabels = DataLabelList()
-    barras.dataLabels.showVal = True
+    barras.dataLabels = solo_etiqueta(valor=True)
+    barras.x_axis.delete = False  # Sin esto, Excel oculta los ejes
+    barras.y_axis.delete = False
     ws.add_chart(barras, "E4")
 
     tarta = PieChart()
@@ -208,8 +222,7 @@ def hoja_resumen(wb: Workbook, r: dict, nombre_mes: str):
     tarta.add_data(Reference(ws, min_col=3, min_row=fila, max_row=fila + len(PRECIOS)), titles_from_data=True)
     tarta.set_categories(categorias)
     tarta.height, tarta.width = 7.5, 13
-    tarta.dataLabels = DataLabelList()
-    tarta.dataLabels.showPercent = True
+    tarta.dataLabels = solo_etiqueta(porcentaje=True)
     ws.add_chart(tarta, "E20")
 
 
